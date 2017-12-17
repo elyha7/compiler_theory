@@ -1,7 +1,7 @@
 import sys
 import numpy as np
 import copy
-class parser(object):
+class Interpreter(object):
     ''' 
     Class takes stack in reverse Polish notation and makes computations 
     '''
@@ -150,10 +150,10 @@ if __name__ == "__main__":
     stack=[int(x) for x in st]
     if len(sys.argv)==3:
         if sys.argv[2]=='Trace':
-            worker=parser(stack,operands,True)
+            worker=Interpreter(stack,operands,True)
             print(worker.count_reversed_form(stack))
     else:
-        worker=parser(stack,operands,False)
+        worker=Interpreter(stack,operands,False)
         worker.count_reversed_form(stack)     
 
 
