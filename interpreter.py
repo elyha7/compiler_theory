@@ -1,3 +1,8 @@
+'''
+Program name: C-like language interpreter
+Author: Rebrikov Artem
+Function: Interpretate program in stack form from lexical analyzer in python
+'''
 import sys
 import numpy as np
 import copy
@@ -33,12 +38,12 @@ class Interpreter(object):
             ## Show count_stack at each step
             if self.trace==True: print(i,self.count_stack)  
             
-            ## link on constant or variable after scaner's work
-            if stack[i] in self.operands.keys(): 
-                self.count_stack.append([stack[i],'link'])
             ## symbol jump for condition operator
-            elif stack[i]>0: 
+            if stack[i]>0 and stack[i+1] in operators.keys() and operators[stack[i+1]] in ['>0','<0','==0','>=0','<=0']: 
                 self.count_stack.append([stack[i],'value'])
+            ## link on constant or variable after scaner's work
+            elif stack[i] in self.operands.keys(): 
+                self.count_stack.append([stack[i],'link'])
             ## operator
             else: 
                 '''
@@ -54,8 +59,9 @@ class Interpreter(object):
                         self.count_stack[-2]=[oper_result,'value']
                         self.count_stack=self.count_stack[:-1]
                     else:
-                        print('ERROR: wrong types')
-                        return -1
+                        error_message='ERROR: wrong types'
+                        print(error_message)
+                        return error_message
                 if operators[stack[i]] in ['=']:
                     values=self.unpack(number=2)
                     types=self.get_type(values)
@@ -68,8 +74,9 @@ class Interpreter(object):
                             self.count_stack[-2]==[values[1],'value']
                             self.count_stack=self.count_stack[:-1]
                         else:
-                            print('ERROR: worong types, trying to write {}->{}'.format(values[1],types[0]))
-                            return -2
+                            error_message='ERROR: worong types, trying to write {}->{}'.format(values[1],types[0])
+                            print(error_message)
+                            return error_message
                 if operators[stack[i]] in ['--','print','goto']:
                     value=self.unpack(number=1)
                     if operators[stack[i]]=='--' and self.get_type(value):
@@ -138,18 +145,22 @@ def isnan(x):
     universal check for nan
     '''
     return x!=x
+"""Operators and operands lists from lexical analyzer"""
 operators={-1:'+',-2:'-',-3:'*',-4:'/',-10:'=',-5:'--',-6:'print',-7:'goto',
           -20:'>0',-21:'<0',-22:'==0',-23:'>=0',-24:'<=0'}
 operands={1:[1,'numb',1],2:[2,'numb',2],3:[3,'numb',3],4:[4.5,'numb',4.5],
           5:['some_string','char','some_string'],6:['a','var',np.NaN],7:['b','var',np.NAN],8:['c','mark',11]}
 if __name__ == "__main__":
+    '''
+    stack.txt looks like [1 3 5 -4 2 100]
+    '''
     st=open(sys.argv[1],'r')
     st=st.read().split(' ')
     if '\n' in st[-1]:
         st[-1]=st[-1][:-1]
     stack=[int(x) for x in st]
     if len(sys.argv)==3:
-        if sys.argv[2]=='Trace':
+        if sys.argv[2]=='Trace' or sys.argv[2]=='trace':
             worker=Interpreter(stack,operands,True)
             print(worker.count_reversed_form(stack))
     else:
